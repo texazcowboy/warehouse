@@ -1,0 +1,18 @@
+version: '3.8'
+
+volumes:
+  warehouse-db-vol:
+
+services:
+  db:
+    container_name: warehouse_db
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    volumes:
+      - warehouse-db-vol:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=usr
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=warehouse
+    restart: unless-stopped

@@ -1,0 +1,8 @@
+server:
+  port: 8081
+database:
+  name: warehouse
+  host: localhost
+  port: 5433
+  username: usr
+  password: pass
