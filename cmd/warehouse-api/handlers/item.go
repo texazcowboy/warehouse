@@ -21,7 +21,12 @@ func (e *Env) CreateItem(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	defer r.Body.Close()
+	defer func() {
+		err := r.Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	err = item.Create(&i, e.DB)
 	if err != nil {
@@ -114,7 +119,13 @@ func (e *Env) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	defer r.Body.Close()
+	defer func() {
+		err := r.Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+
 	i.Id = int64(id)
 
 	err = item.Update(&i, e.DB)
