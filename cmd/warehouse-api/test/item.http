@@ -6,8 +6,14 @@ Content-Type: application/json
   "name": "test"
 }
 
+> {%
+    if(response.body["id"]) {
+        client.global.set("id", response.body.id);
+    }
+%}
+
 ### GET
-GET http://localhost:8081/item/3
+GET http://localhost:8081/item/{{id}}
 Accept: application/json
 
 ### GET ALL
@@ -15,7 +21,7 @@ GET http://localhost:8081/items
 Accept: application/json
 
 ### UPDATE
-PUT http://localhost:8081/item/3
+PUT http://localhost:8081/item/{{id}}
 Accept: application/json
 
 {
@@ -23,5 +29,5 @@ Accept: application/json
 }
 
 ### DELETE
-DELETE http://localhost:8081/item/3
+DELETE http://localhost:8081/item/{{id}}
 Accept: application/json
