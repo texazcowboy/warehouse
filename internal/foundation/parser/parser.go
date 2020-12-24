@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func Parse(data interface{}, path string) {
+func ParseFile(data interface{}, path string) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
