@@ -4,47 +4,37 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/gorilla/mux"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
 	"github.com/texazcowboy/warehouse/internal/foundation/database"
 	"log"
 	"net/http"
 )
 
-var configPath = flag.String("config", "../../config.yaml", "config file location")
-
-func init() {
-	flag.Parse()
-}
+var (
+	configPath = flag.String("config", "../../config.yaml", "config file location")
+)
 
 type App struct {
 	ApplicationConfig
 	*mux.Router
 	*sql.DB
+	initialized bool
+}
+
+func init() {
+	flag.Parse()
 }
 
 func (a *App) Initialize() {
-	var cfg ApplicationConfig
-	log.Println("Trying to read application configuration")
-	cfg.Read(configPath)
-	log.Println("Application configuration was successfully read")
-
-	log.Printf("Connecting to database.\n")
-	log.Printf("User: %v | Host: %v | Port: %v | Name: %v\n",
-		cfg.DatabaseCfg.User, cfg.DatabaseCfg.Host, cfg.DatabaseCfg.Port, cfg.DatabaseCfg.Name)
-	db, err := database.OpenConnection(&cfg.DatabaseCfg)
-	if err != nil {
-		log.Fatal(err)
+	if a.initialized {
+		log.Println("Application is already initialized")
+		return
 	}
-	if err = db.Ping(); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("Successfully connected")
-
-	a.DB = db
-	a.Router = mux.NewRouter()
-	a.ApplicationConfig = cfg
-
-	log.Println("Initializing routes")
-	a.initRoutes()
+	a.readConfiguration()
+	a.openDBConnection()
+	a.initRouter()
+	a.registerHandlers()
+	a.initialized = true
 }
 
 func (a *App) Run() {
@@ -52,6 +42,47 @@ func (a *App) Run() {
 	log.Fatal(http.ListenAndServe(`:`+a.ServerCfg.Port, a.Router))
 }
 
-func (a *App) initRoutes() {
-	// tbd
+func (a *App) openDBConnection() {
+	log.Printf("Connecting to database.\n")
+	log.Printf("Connection params [User: %v | Host: %v | Port: %v | Name: %v]\n",
+		a.DatabaseCfg.User, a.DatabaseCfg.Host, a.DatabaseCfg.Port, a.DatabaseCfg.Name)
+
+	db, err := database.OpenConnection(&a.DatabaseCfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err = db.Ping(); err != nil {
+		log.Fatal(err)
+	}
+	a.DB = db
+
+	log.Println("Successfully connected")
+}
+
+func (a *App) initRouter() {
+	a.Router = mux.NewRouter()
+}
+
+func (a *App) readConfiguration() {
+	log.Println("Trying to read application configuration")
+
+	var cfg ApplicationConfig
+	cfg.Read(configPath)
+	a.ApplicationConfig = cfg
+
+	log.Println("Application configuration successfully read")
+}
+
+func (a *App) registerHandlers() {
+	log.Println("Registering handlers")
+
+	env := handlers.NewEnvironment(a.DB)
+
+	a.Router.HandleFunc("/item", env.CreateItem).Methods("POST")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", env.GetItem).Methods("GET")
+	a.Router.HandleFunc("/items", env.GetItems).Methods("GET")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", env.UpdateItem).Methods("PUT")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", env.DeleteItem).Methods("DELETE")
+
+	log.Println("Handlers successfully registered")
 }

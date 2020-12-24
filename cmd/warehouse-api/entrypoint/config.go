@@ -13,5 +13,5 @@ type ApplicationConfig struct {
 
 func (c *ApplicationConfig) Read(path *string) {
 	// validation tbd
-	parser.Parse(c, *path)
+	parser.ParseFile(c, *path)
 }
