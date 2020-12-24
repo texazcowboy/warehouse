@@ -1,35 +1,30 @@
 package item
 
-import "database/sql"
+import (
+	"database/sql"
+	"github.com/texazcowboy/warehouse/internal/foundation/database"
+)
 
 func Create(item *Item, db *sql.DB) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	row := db.QueryRow("INSERT INTO item(name) VALUES($1) RETURNING id", item.Name)
-	if err = row.Scan(&item.Id); err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return database.ExecInTransaction(db, func(tx database.Transaction) error {
+		row := tx.QueryRow("INSERT INTO item(name) VALUES($1) RETURNING id", item.Name)
+		if err := row.Scan(&item.Id); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func Get(id int64, db *sql.DB) (*Item, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
 	var item Item
-	row := db.QueryRow("SELECT * FROM item WHERE id =$1", id)
-	if err = row.Scan(&item.Id, &item.Name); err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	if err = tx.Commit(); err != nil {
+	err := database.ExecInTransaction(db, func(tx database.Transaction) error {
+		row := tx.QueryRow("SELECT * FROM item WHERE id =$1", id)
+		if err := row.Scan(&item.Id, &item.Name); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
 	return &item, nil
@@ -37,70 +32,51 @@ func Get(id int64, db *sql.DB) (*Item, error) {
 
 // pagination tbd
 func GetAll(db *sql.DB) ([]*Item, error) {
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
 	var items []*Item
-
-	rows, err := db.Query("SELECT * from item")
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var i Item
-		if err := rows.Scan(&i.Id, &i.Name); err != nil {
-			tx.Rollback()
-			return nil, err
+	err := database.ExecInTransaction(db, func(tx database.Transaction) error {
+		rows, err := tx.Query("SELECT * from item")
+		if err != nil {
+			return err
 		}
-		items = append(items, &i)
-	}
-	if err = tx.Commit(); err != nil {
+		defer rows.Close()
+		for rows.Next() {
+			var i Item
+			if err := rows.Scan(&i.Id, &i.Name); err != nil {
+				return err
+			}
+			items = append(items, &i)
+		}
+		return nil
+	})
+	if err != nil {
 		return nil, err
 	}
-
 	return items, nil
 }
 
 func Update(item *Item, db *sql.DB) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	res, err := db.Exec("UPDATE item SET name=$1 WHERE id=$2", item.Name, item.Id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	if rowsAffected == 0 {
-		return sql.ErrNoRows
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return database.ExecInTransaction(db, func(tx database.Transaction) error {
+		res, err := tx.Exec("UPDATE item SET name=$1 WHERE id=$2", item.Name, item.Id)
+		if err != nil {
+			return err
+		}
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if rowsAffected == 0 {
+			return sql.ErrNoRows
+		}
+		return nil
+	})
 }
 
 func Delete(id int64, db *sql.DB) error {
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-	_, err = db.Exec("DELETE FROM item WHERE id=$1", id)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	if err = tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return database.ExecInTransaction(db, func(tx database.Transaction) error {
+		_, err := tx.Exec("DELETE FROM item WHERE id=$1", id)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 }
