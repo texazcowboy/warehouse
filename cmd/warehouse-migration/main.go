@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
@@ -13,22 +14,39 @@ import (
 var (
 	configPath = flag.String("config", "../../config.yaml", "config file location")
 	sourcePath = flag.String("src", "file://migrations", "migration source")
+	direction  = flag.String("drc", "up", "migration direction")
 )
 
 func init() {
 	flag.Parse()
 }
 
-// note: only goes in the up direction and applies all scripts
+// note: applies all scripts
 func main() {
-	var cfg ApplicationConfig
-	cfg.Read(configPath)
-	m, err := migrate.New(*sourcePath, buildConnectionString(&cfg.DBConfig))
+	m, err := setupMigration()
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := m.Up(); err != nil {
+	err = applyMigration(m)
+	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func setupMigration() (*migrate.Migrate, error) {
+	var cfg ApplicationConfig
+	cfg.Read(configPath)
+	return migrate.New(*sourcePath, buildConnectionString(&cfg.DBConfig))
+}
+
+func applyMigration(m *migrate.Migrate) error {
+	switch *direction {
+	case "up":
+		return m.Up()
+	case "down":
+		return m.Down()
+	default:
+		return errors.New("Invalid direction provided: " + *direction + " Available directions: up, down")
 	}
 }
 
