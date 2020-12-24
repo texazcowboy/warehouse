@@ -2,13 +2,13 @@ package item
 
 import "database/sql"
 
-func create(name string, db *sql.DB) error {
+func Create(item *Item, db *sql.DB) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("INSERT INTO item(name) VALUES($1)", name)
-	if err != nil {
+	row := db.QueryRow("INSERT INTO item(name) VALUES($1) RETURNING id", item.Name)
+	if err = row.Scan(&item.Id); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -18,7 +18,7 @@ func create(name string, db *sql.DB) error {
 	return nil
 }
 
-func get(id int64, db *sql.DB) (*Item, error) {
+func Get(id int64, db *sql.DB) (*Item, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
@@ -32,10 +32,11 @@ func get(id int64, db *sql.DB) (*Item, error) {
 	if err = tx.Commit(); err != nil {
 		return nil, err
 	}
-	return &item, err
+	return &item, nil
 }
 
-func getAll(db *sql.DB) ([]*Item, error) {
+// pagination tbd
+func GetAll(db *sql.DB) ([]*Item, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
@@ -64,15 +65,23 @@ func getAll(db *sql.DB) ([]*Item, error) {
 	return items, nil
 }
 
-func update(id int64, name string, db *sql.DB) error {
+func Update(item *Item, db *sql.DB) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("UPDATE item SET name=$1 WHERE id=$2", name, id)
+	res, err := db.Exec("UPDATE item SET name=$1 WHERE id=$2", item.Name, item.Id)
 	if err != nil {
 		tx.Rollback()
 		return err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
 	}
 	if err = tx.Commit(); err != nil {
 		return err
@@ -80,7 +89,7 @@ func update(id int64, name string, db *sql.DB) error {
 	return nil
 }
 
-func delete(id int64, db *sql.DB) error {
+func Delete(id int64, db *sql.DB) error {
 	tx, err := db.Begin()
 	if err != nil {
 		return err

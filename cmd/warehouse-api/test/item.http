@@ -1,0 +1,27 @@
+### CREATE
+POST http://localhost:8081/item
+Content-Type: application/json
+
+{
+  "name": "test"
+}
+
+### GET
+GET http://localhost:8081/item/3
+Accept: application/json
+
+### GET ALL
+GET http://localhost:8081/items
+Accept: application/json
+
+### UPDATE
+PUT http://localhost:8081/item/3
+Accept: application/json
+
+{
+  "name": "updated"
+}
+
+### DELETE
+DELETE http://localhost:8081/item/3
+Accept: application/json

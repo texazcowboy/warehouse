@@ -30,6 +30,6 @@ func Respond(w http.ResponseWriter, status int, payload interface{}) error {
 	return nil
 }
 
-func ResponseError(w http.ResponseWriter, status int, message string) error {
+func RespondError(w http.ResponseWriter, status int, message string) error {
 	return Respond(w, status, &ErrorResponse{message})
 }
