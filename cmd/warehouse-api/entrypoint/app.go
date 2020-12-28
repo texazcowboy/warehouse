@@ -3,11 +3,12 @@ package entrypoint
 import (
 	"database/sql"
 	"flag"
+	"log"
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
 	"github.com/texazcowboy/warehouse/internal/foundation/database"
-	"log"
-	"net/http"
 )
 
 var (

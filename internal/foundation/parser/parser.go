@@ -1,9 +1,10 @@
 package parser
 
 import (
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+
+	"gopkg.in/yaml.v2"
 )
 
 func ParseFile(data interface{}, path string) {

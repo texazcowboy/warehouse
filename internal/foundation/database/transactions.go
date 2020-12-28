@@ -19,12 +19,13 @@ func ExecInTransaction(db *sql.DB, fn TxFn) (err error) {
 		return
 	}
 	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
+		switch p := recover(); {
+		case p != nil:
+			tx.Rollback() // nolint
 			panic(p)
-		} else if err != nil {
-			tx.Rollback()
-		} else {
+		case err != nil:
+			tx.Rollback() // nolint
+		default:
 			err = tx.Commit()
 		}
 	}()

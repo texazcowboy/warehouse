@@ -3,6 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
+
+	// register drivers.
 	_ "github.com/lib/pq"
 )
 

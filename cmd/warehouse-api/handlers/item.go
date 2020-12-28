@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"database/sql"
-	"github.com/gorilla/mux"
-	"github.com/texazcowboy/warehouse/internal/foundation/web"
-	"github.com/texazcowboy/warehouse/internal/item"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/texazcowboy/warehouse/internal/foundation/web"
+	"github.com/texazcowboy/warehouse/internal/item"
 )
 
 func (e *Env) CreateItem(w http.ResponseWriter, r *http.Request) {
@@ -126,7 +127,7 @@ func (e *Env) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	i.Id = int64(id)
+	i.ID = int64(id)
 
 	err = item.Update(&i, e.DB)
 	if err != nil {
