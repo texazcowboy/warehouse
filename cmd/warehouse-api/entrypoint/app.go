@@ -3,8 +3,9 @@ package entrypoint
 import (
 	"database/sql"
 	"flag"
-	"log"
 	"net/http"
+
+	"github.com/texazcowboy/warehouse/internal/foundation/logger"
 
 	"github.com/gorilla/mux"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
@@ -17,6 +18,7 @@ var (
 
 type App struct {
 	ApplicationConfig
+	*logger.Logger
 	*mux.Router
 	*sql.DB
 	initialized bool
@@ -28,36 +30,45 @@ func init() {
 
 func (a *App) Initialize() {
 	if a.initialized {
-		log.Println("Application is already initialized")
+		a.LogEntry.Warn("Application is already initialized")
 		return
 	}
 	a.readConfiguration()
-	a.openDBConnection()
+	a.initLogger()
 	a.initRouter()
+	a.openDBConnection()
 	a.registerHandlers()
 	a.initialized = true
 }
 
 func (a *App) Run() {
-	log.Printf("Starting server on port %v\n", a.ServerCfg.Port)
-	log.Fatal(http.ListenAndServe(`:`+a.ServerCfg.Port, a.Router))
+	a.LogEntry.Infof("Starting server on port %v", a.ServerCfg.Port)
+	a.LogEntry.Fatal(http.ListenAndServe(`:`+a.ServerCfg.Port, a.Router))
+}
+
+func (a *App) initLogger() {
+	log, err := logger.NewLogger(&a.LoggerCfg)
+	if err != nil {
+		panic(err)
+	}
+	a.Logger = log
 }
 
 func (a *App) openDBConnection() {
-	log.Printf("Connecting to database.\n")
-	log.Printf("Connection params [User: %v | Host: %v | Port: %v | Name: %v]\n",
+	a.LogEntry.Info("Connecting to database.")
+	a.LogEntry.Infof("Connection params [User: %v | Host: %v | Port: %v | Name: %v]",
 		a.DatabaseCfg.User, a.DatabaseCfg.Host, a.DatabaseCfg.Port, a.DatabaseCfg.Name)
 
 	db, err := database.OpenConnection(&a.DatabaseCfg)
 	if err != nil {
-		log.Fatal(err)
+		a.LogEntry.Fatal(err)
 	}
 	if err = db.Ping(); err != nil {
-		log.Fatal(err)
+		a.LogEntry.Fatal(err)
 	}
 	a.DB = db
 
-	log.Println("Successfully connected")
+	a.LogEntry.Info("Successfully connected")
 }
 
 func (a *App) initRouter() {
@@ -65,19 +76,15 @@ func (a *App) initRouter() {
 }
 
 func (a *App) readConfiguration() {
-	log.Println("Trying to read application configuration")
-
 	var cfg ApplicationConfig
 	cfg.Read(configPath)
 	a.ApplicationConfig = cfg
-
-	log.Println("Application configuration successfully read")
 }
 
 func (a *App) registerHandlers() {
-	log.Println("Registering handlers")
+	a.LogEntry.Info("Registering handlers")
 
-	env := handlers.NewEnvironment(a.DB)
+	env := handlers.NewEnvironment(a.DB, a.Logger)
 
 	a.Router.HandleFunc("/item", env.CreateItem).Methods("POST")
 	a.Router.HandleFunc("/item/{id:[0-9]+}", env.GetItem).Methods("GET")
@@ -85,5 +92,5 @@ func (a *App) registerHandlers() {
 	a.Router.HandleFunc("/item/{id:[0-9]+}", env.UpdateItem).Methods("PUT")
 	a.Router.HandleFunc("/item/{id:[0-9]+}", env.DeleteItem).Methods("DELETE")
 
-	log.Println("Handlers successfully registered")
+	a.LogEntry.Info("Handlers successfully registered")
 }
