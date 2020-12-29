@@ -5,6 +5,8 @@ import (
 	"flag"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/texazcowboy/warehouse/internal/foundation/logger"
 
 	"github.com/gorilla/mux"
@@ -17,10 +19,11 @@ var (
 )
 
 type App struct {
-	ApplicationConfig
+	*ApplicationConfig
 	*logger.Logger
 	*mux.Router
 	*sql.DB
+	*validator.Validate
 	initialized bool
 }
 
@@ -33,9 +36,10 @@ func (a *App) Initialize() {
 		a.LogEntry.Warn("Application is already initialized")
 		return
 	}
+	a.setupValidator()
 	a.readConfiguration()
-	a.initLogger()
-	a.initRouter()
+	a.setupLogger()
+	a.setupRouter()
 	a.openDBConnection()
 	a.registerHandlers()
 	a.initialized = true
@@ -46,12 +50,16 @@ func (a *App) Run() {
 	a.LogEntry.Fatal(http.ListenAndServe(`:`+a.ServerCfg.Port, a.Router))
 }
 
-func (a *App) initLogger() {
-	log, err := logger.NewLogger(&a.LoggerCfg)
+func (a *App) setupLogger() {
+	log, err := logger.NewLogger(a.LoggerCfg)
 	if err != nil {
 		panic(err)
 	}
 	a.Logger = log
+}
+
+func (a *App) setupValidator() {
+	a.Validate = validator.New()
 }
 
 func (a *App) openDBConnection() {
@@ -59,7 +67,7 @@ func (a *App) openDBConnection() {
 	a.LogEntry.Infof("Connection params [User: %v | Host: %v | Port: %v | Name: %v]",
 		a.DatabaseCfg.User, a.DatabaseCfg.Host, a.DatabaseCfg.Port, a.DatabaseCfg.Name)
 
-	db, err := database.OpenConnection(&a.DatabaseCfg)
+	db, err := database.OpenConnection(a.DatabaseCfg)
 	if err != nil {
 		a.LogEntry.Fatal(err)
 	}
@@ -71,26 +79,31 @@ func (a *App) openDBConnection() {
 	a.LogEntry.Info("Successfully connected")
 }
 
-func (a *App) initRouter() {
+func (a *App) setupRouter() {
 	a.Router = mux.NewRouter()
 }
 
 func (a *App) readConfiguration() {
 	var cfg ApplicationConfig
-	cfg.Read(configPath)
-	a.ApplicationConfig = cfg
+	if err := cfg.Read(configPath); err != nil {
+		panic(err)
+	}
+	if err := a.Validate.Struct(cfg); err != nil {
+		panic(err)
+	}
+	a.ApplicationConfig = &cfg
 }
 
 func (a *App) registerHandlers() {
 	a.LogEntry.Info("Registering handlers")
 
-	env := handlers.NewEnvironment(a.DB, a.Logger)
+	itemHandler := handlers.NewItemHandler(a.DB, a.Logger, a.Validate)
 
-	a.Router.HandleFunc("/item", env.CreateItem).Methods("POST")
-	a.Router.HandleFunc("/item/{id:[0-9]+}", env.GetItem).Methods("GET")
-	a.Router.HandleFunc("/items", env.GetItems).Methods("GET")
-	a.Router.HandleFunc("/item/{id:[0-9]+}", env.UpdateItem).Methods("PUT")
-	a.Router.HandleFunc("/item/{id:[0-9]+}", env.DeleteItem).Methods("DELETE")
+	a.Router.HandleFunc("/item", itemHandler.CreateItem).Methods("POST")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.GetItem).Methods("GET")
+	a.Router.HandleFunc("/items", itemHandler.GetItems).Methods("GET")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.UpdateItem).Methods("PUT")
+	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.DeleteItem).Methods("DELETE")
 
 	a.LogEntry.Info("Handlers successfully registered")
 }

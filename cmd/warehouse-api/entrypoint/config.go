@@ -8,12 +8,11 @@ import (
 )
 
 type ApplicationConfig struct {
-	ServerCfg   web.WConfig       `yaml:"server"`
-	DatabaseCfg database.DBConfig `yaml:"database"`
-	LoggerCfg   logger.LConfig    `yaml:"logger"`
+	ServerCfg   *web.WConfig       `yaml:"server" validate:"required"`
+	DatabaseCfg *database.DBConfig `yaml:"database" validate:"required"`
+	LoggerCfg   *logger.LConfig    `yaml:"log" validate:"required"`
 }
 
-func (c *ApplicationConfig) Read(path *string) {
-	// validation tbd
-	parser.ParseFile(c, *path)
+func (c *ApplicationConfig) Read(path *string) error {
+	return parser.ParseFile(c, *path)
 }

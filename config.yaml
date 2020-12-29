@@ -6,7 +6,7 @@ database:
   port: 5433
   username: usr
   password: pass
-logger:
+log:
   app-name: warehouse
   level: debug
   format: json

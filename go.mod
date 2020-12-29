@@ -3,6 +3,7 @@ module github.com/texazcowboy/warehouse
 go 1.15
 
 require (
+	github.com/go-playground/validator/v10 v10.4.1
 	github.com/golang-migrate/migrate/v4 v4.14.1
 	github.com/golangci/golangci-lint v1.33.0 // indirect
 	github.com/gorilla/mux v1.8.0

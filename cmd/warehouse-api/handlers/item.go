@@ -5,12 +5,26 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/go-playground/validator/v10"
+
+	"github.com/texazcowboy/warehouse/internal/foundation/logger"
+
 	"github.com/gorilla/mux"
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
 	"github.com/texazcowboy/warehouse/internal/item"
 )
 
-func (e *Env) CreateItem(w http.ResponseWriter, r *http.Request) {
+type ItemHandler struct {
+	*sql.DB
+	*logger.Logger
+	*validator.Validate
+}
+
+func NewItemHandler(db *sql.DB, logger *logger.Logger, validator *validator.Validate) *ItemHandler {
+	return &ItemHandler{DB: db, Logger: logger, Validate: validator}
+}
+
+func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 	var i item.Item
 	err := web.Decode(r, &i)
 	if err != nil {
@@ -44,7 +58,7 @@ func (e *Env) CreateItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (e *Env) GetItem(w http.ResponseWriter, r *http.Request) {
+func (e *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -81,7 +95,7 @@ func (e *Env) GetItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (e *Env) GetItems(w http.ResponseWriter, r *http.Request) {
+func (e *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 	result, err := item.GetAll(e.DB)
 	if err != nil {
 		e.LogEntry.Error(err)
@@ -97,7 +111,7 @@ func (e *Env) GetItems(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (e *Env) UpdateItem(w http.ResponseWriter, r *http.Request) {
+func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -153,7 +167,7 @@ func (e *Env) UpdateItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (e *Env) DeleteItem(w http.ResponseWriter, r *http.Request) {
+func (e *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {

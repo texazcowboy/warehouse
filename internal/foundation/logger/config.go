@@ -11,7 +11,7 @@ const (
 )
 
 type LConfig struct {
-	AppName string    `yaml:"app-name"`
-	Level   LogLevel  `yaml:"level"`
-	Format  LogFormat `yaml:"format"`
+	AppName string    `yaml:"app-name" validate:"required"`
+	Level   LogLevel  `yaml:"level" validate:"required"`
+	Format  LogFormat `yaml:"format" validate:"required"`
 }

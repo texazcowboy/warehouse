@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" // nolint
 	_ "github.com/golang-migrate/migrate/v4/source/file"       // nolint
@@ -23,8 +25,9 @@ func init() {
 }
 
 type App struct {
-	ApplicationConfig
+	*ApplicationConfig
 	*logger.Logger
+	*validator.Validate
 	initialized bool
 }
 
@@ -33,12 +36,13 @@ func (a *App) Initialize() {
 		a.LogEntry.Warn("Application is already initialized")
 		return
 	}
+	a.setupValidator()
 	a.readConfiguration()
-	a.initLogger()
+	a.setupLogger()
 }
 
 func (a *App) Run() {
-	m, err := setupMigration(&a.DBConfig)
+	m, err := setupMigration(a.DBConfig)
 	if err != nil {
 		a.LogEntry.Fatal(err)
 	}
@@ -50,12 +54,21 @@ func (a *App) Run() {
 
 func (a *App) readConfiguration() {
 	var cfg ApplicationConfig
-	cfg.Read(configPath)
-	a.ApplicationConfig = cfg
+	if err := cfg.Read(configPath); err != nil {
+		panic(err)
+	}
+	if err := a.Validate.Struct(cfg); err != nil {
+		panic(err)
+	}
+	a.ApplicationConfig = &cfg
 }
 
-func (a *App) initLogger() {
-	log, err := logger.NewLogger(&a.LConfig)
+func (a *App) setupValidator() {
+	a.Validate = validator.New()
+}
+
+func (a *App) setupLogger() {
+	log, err := logger.NewLogger(a.LConfig)
 	if err != nil {
 		panic(err)
 	}
