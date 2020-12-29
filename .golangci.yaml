@@ -51,5 +51,3 @@ linters:
     - prealloc
     - testpackage
 #    - wsl
-  fast: true
-
