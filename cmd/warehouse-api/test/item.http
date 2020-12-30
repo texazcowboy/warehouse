@@ -3,7 +3,7 @@ POST http://localhost:8081/item
 Content-Type: application/json
 
 {
-  "name": "test"
+  "name": "12345678"
 }
 
 > {%

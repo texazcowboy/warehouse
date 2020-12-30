@@ -42,6 +42,26 @@ func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	if err = e.Validate.Struct(&i); err != nil {
+		e.LogEntry.Error(err)
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			if err := web.RespondError(w, http.StatusInternalServerError, "Invalid validation input"); err != nil {
+				e.LogEntry.Error(err)
+				return
+			}
+			return
+		}
+		var message string
+		for _, err = range err.(validator.ValidationErrors) {
+			message += err.Error() + ". "
+		}
+		if err := web.RespondError(w, http.StatusBadRequest, message); err != nil {
+			e.LogEntry.Error(err)
+			return
+		}
+		return
+	}
+
 	err = item.Create(&i, e.DB)
 	if err != nil {
 		e.LogEntry.Error(err)
@@ -139,6 +159,26 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 			e.LogEntry.Error(err)
 		}
 	}()
+
+	if err = e.Validate.Struct(&i); err != nil {
+		e.LogEntry.Error(err)
+		if _, ok := err.(*validator.InvalidValidationError); ok {
+			if err := web.RespondError(w, http.StatusInternalServerError, "Invalid validation input"); err != nil {
+				e.LogEntry.Error(err)
+				return
+			}
+			return
+		}
+		var message string
+		for _, err = range err.(validator.ValidationErrors) {
+			message += err.Error() + ". "
+		}
+		if err := web.RespondError(w, http.StatusBadRequest, message); err != nil {
+			e.LogEntry.Error(err)
+			return
+		}
+		return
+	}
 
 	i.ID = int64(id)
 
