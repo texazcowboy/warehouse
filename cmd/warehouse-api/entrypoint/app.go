@@ -96,14 +96,18 @@ func (a *App) readConfiguration() {
 
 func (a *App) registerHandlers() {
 	a.LogEntry.Info("Registering handlers")
+	baseHandler := handlers.BaseHandler{DB: a.DB, Logger: a.Logger, Validate: a.Validate}
 
-	itemHandler := handlers.NewItemHandler(a.DB, a.Logger, a.Validate)
-
+	itemHandler := handlers.NewItemHandler(&baseHandler)
 	a.Router.HandleFunc("/item", itemHandler.CreateItem).Methods("POST")
 	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.GetItem).Methods("GET")
 	a.Router.HandleFunc("/items", itemHandler.GetItems).Methods("GET")
 	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.UpdateItem).Methods("PUT")
 	a.Router.HandleFunc("/item/{id:[0-9]+}", itemHandler.DeleteItem).Methods("DELETE")
+
+	userHandler := handlers.NewUserHandler(&baseHandler)
+	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
+	a.Router.HandleFunc("/user/{id:[0-9]+}", userHandler.DeleteUser).Methods("DELETE")
 
 	a.LogEntry.Info("Handlers successfully registered")
 }

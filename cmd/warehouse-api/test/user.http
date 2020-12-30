@@ -1,0 +1,18 @@
+### CREATE
+POST http://localhost:8081/user
+Content-Type: application/json
+
+{
+  "username": "vvv",
+  "password": "very_secret"
+}
+
+> {%
+    if(response.body["id"]) {
+        client.global.set("id", response.body.id);
+    }
+%}
+
+### DELETE
+DELETE http://localhost:8081/user/{{id}}
+Accept: application/json

@@ -6,20 +6,16 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/texazcowboy/warehouse/internal/foundation/logger"
-
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
 	"github.com/texazcowboy/warehouse/internal/item"
 )
 
 type ItemHandler struct {
-	*sql.DB
-	*logger.Logger
-	*validator.Validate
+	*BaseHandler
 }
 
-func NewItemHandler(db *sql.DB, logger *logger.Logger, validator *validator.Validate) *ItemHandler {
-	return &ItemHandler{DB: db, Logger: logger, Validate: validator}
+func NewItemHandler(base *BaseHandler) *ItemHandler {
+	return &ItemHandler{base}
 }
 
 func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
@@ -152,16 +148,4 @@ func (e *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	e.renderSuccess(w, http.StatusNoContent, nil)
-}
-
-func (e *ItemHandler) renderError(w http.ResponseWriter, status int, err error) {
-	if err := web.RespondError(w, status, err.Error()); err != nil {
-		e.LogEntry.Error(err)
-	}
-}
-
-func (e *ItemHandler) renderSuccess(w http.ResponseWriter, status int, payload interface{}) {
-	if err := web.Respond(w, status, payload); err != nil {
-		e.LogEntry.Error(err)
-	}
 }
