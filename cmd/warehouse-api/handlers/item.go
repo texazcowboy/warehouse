@@ -3,13 +3,11 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/go-playground/validator/v10"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/logger"
 
-	"github.com/gorilla/mux"
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
 	"github.com/texazcowboy/warehouse/internal/item"
 )
@@ -60,8 +58,7 @@ func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id, err := web.ExtractIntFromRequest(r, "id")
 	if err != nil {
 		e.LogEntry.Error(err)
 		e.renderError(w, http.StatusBadRequest, err)
@@ -93,8 +90,7 @@ func (e *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id, err := web.ExtractIntFromRequest(r, "id")
 	if err != nil {
 		e.LogEntry.Error(err)
 		e.renderError(w, http.StatusBadRequest, err)
@@ -143,8 +139,7 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 }
 
 func (e *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id, err := web.ExtractIntFromRequest(r, "id")
 	if err != nil {
 		e.LogEntry.Error(err)
 		e.renderError(w, http.StatusBadRequest, err)
