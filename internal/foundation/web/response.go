@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -17,13 +18,13 @@ func Respond(w http.ResponseWriter, status int, payload interface{}) error {
 
 	response, err := json.Marshal(payload)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Respond -> json.Marshal(%v)", payload)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_, err = w.Write(response)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Respond -> w.Write(%v)", response)
 	}
 
 	return nil
