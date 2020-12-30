@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/texazcowboy/warehouse/internal/token"
+	"github.com/texazcowboy/warehouse/internal/foundation/security"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/crypto"
 
@@ -94,7 +94,7 @@ func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		e.renderError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
-	generatedToken, err := token.GenerateToken(map[string]interface{}{
+	generatedToken, err := security.GenerateToken(map[string]interface{}{
 		"user_id":    savedUser.ID,
 		"username":   savedUser.Username,
 		"authorized": true,

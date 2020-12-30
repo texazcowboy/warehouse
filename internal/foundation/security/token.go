@@ -1,4 +1,4 @@
-package token
+package security
 
 import (
 	"time"
@@ -6,6 +6,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 )
+
+// nolint
+type Token struct {
+	AccessToken string `json:"access_token"`
+	// todo: add RefreshToken
+}
 
 const Secret string = "secret" // tmp solution.
 

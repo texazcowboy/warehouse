@@ -5,9 +5,9 @@ import (
 	"flag"
 	"net/http"
 
-	"github.com/texazcowboy/warehouse/internal/foundation/web"
+	"github.com/texazcowboy/warehouse/internal/foundation/security"
 
-	"github.com/texazcowboy/warehouse/internal/token"
+	"github.com/texazcowboy/warehouse/internal/foundation/web"
 
 	"github.com/go-playground/validator/v10"
 
@@ -104,20 +104,20 @@ func (a *App) registerHandlers() {
 
 	itemHandler := handlers.NewItemHandler(&baseHandler)
 	a.Router.HandleFunc("/item",
-		web.AuthenticationMiddleware(itemHandler.CreateItem, a.LogEntry, token.ValidateToken)).Methods("POST")
+		web.AuthenticationMiddleware(itemHandler.CreateItem, a.LogEntry, security.ValidateToken)).Methods("POST")
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
-		web.AuthenticationMiddleware(itemHandler.GetItem, a.LogEntry, token.ValidateToken)).Methods("GET")
+		web.AuthenticationMiddleware(itemHandler.GetItem, a.LogEntry, security.ValidateToken)).Methods("GET")
 	a.Router.HandleFunc("/items",
-		web.AuthenticationMiddleware(itemHandler.GetItems, a.LogEntry, token.ValidateToken)).Methods("GET")
+		web.AuthenticationMiddleware(itemHandler.GetItems, a.LogEntry, security.ValidateToken)).Methods("GET")
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
-		web.AuthenticationMiddleware(itemHandler.UpdateItem, a.LogEntry, token.ValidateToken)).Methods("PUT")
+		web.AuthenticationMiddleware(itemHandler.UpdateItem, a.LogEntry, security.ValidateToken)).Methods("PUT")
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
-		web.AuthenticationMiddleware(itemHandler.DeleteItem, a.LogEntry, token.ValidateToken)).Methods("DELETE")
+		web.AuthenticationMiddleware(itemHandler.DeleteItem, a.LogEntry, security.ValidateToken)).Methods("DELETE")
 
 	userHandler := handlers.NewUserHandler(&baseHandler)
 	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
 	a.Router.HandleFunc("/user/{id:[0-9]+}",
-		web.AuthenticationMiddleware(userHandler.DeleteUser, a.LogEntry, token.ValidateToken)).Methods("DELETE")
+		web.AuthenticationMiddleware(userHandler.DeleteUser, a.LogEntry, security.ValidateToken)).Methods("DELETE")
 	a.Router.HandleFunc("/login", userHandler.Login).Methods("POST")
 
 	a.LogEntry.Info("Handlers successfully registered")
