@@ -12,7 +12,6 @@ type ErrorResponse struct {
 }
 
 func Respond(w http.ResponseWriter, status int, payload interface{}) error {
-
 	if status == http.StatusNoContent {
 		w.WriteHeader(status)
 		return nil

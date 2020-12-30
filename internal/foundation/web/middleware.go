@@ -9,11 +9,11 @@ import (
 
 type TokenValidator func(string) error
 
-func AuthenticationMiddleware(next http.HandlerFunc, l *logrus.Entry, validatorFunc TokenValidator) http.HandlerFunc {
+func AuthenticationMiddleware(next http.HandlerFunc, l *logrus.Entry, validatorFunc TokenValidator) http.HandlerFunc { // nolint
 	return func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		arr := strings.Split(authHeader, " ")
-		if len(arr) != 2 {
+		if len(arr) != 2 { // nolint
 			if err := RespondError(w, http.StatusBadRequest, "unexpected tokens in authorization header"); err != nil {
 				l.Error(err)
 			}

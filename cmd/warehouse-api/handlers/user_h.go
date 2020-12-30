@@ -98,7 +98,7 @@ func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"user_id":    savedUser.ID,
 		"username":   savedUser.Username,
 		"authorized": true,
-		"exp":        time.Now().Add(time.Minute * 15).Unix(),
+		"exp":        time.Now().Add(time.Minute * 15).Unix(), // nolint
 	})
 	if err != nil {
 		e.LogEntry.Error(err)
