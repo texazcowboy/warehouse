@@ -31,7 +31,6 @@ func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusBadRequest, "Invalid payload"); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
@@ -47,17 +46,12 @@ func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			if err := web.RespondError(w, http.StatusInternalServerError, "Invalid validation input"); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
-			return
 		}
-		var message string
-		for _, err = range err.(validator.ValidationErrors) {
-			message += err.Error() + ". "
-		}
-		if err := web.RespondError(w, http.StatusBadRequest, message); err != nil {
-			e.LogEntry.Error(err)
-			return
+		if err, ok := err.(*validator.InvalidValidationError); ok {
+			if err := web.RespondError(w, http.StatusBadRequest, err.Error()); err != nil {
+				e.LogEntry.Error(err)
+			}
 		}
 		return
 	}
@@ -67,14 +61,12 @@ func (e *ItemHandler) CreateItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusInternalServerError, err.Error()); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
 
 	if err = web.Respond(w, http.StatusCreated, &i); err != nil {
 		e.LogEntry.Error(err)
-		return
 	}
 }
 
@@ -85,7 +77,6 @@ func (e *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusBadRequest, "Invalid item id"); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
@@ -97,13 +88,11 @@ func (e *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 		case sql.ErrNoRows:
 			if err := web.RespondError(w, http.StatusNotFound, "Item not found"); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
 			return
 		default:
 			if err := web.RespondError(w, http.StatusInternalServerError, err.Error()); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
 			return
 		}
@@ -111,7 +100,6 @@ func (e *ItemHandler) GetItem(w http.ResponseWriter, r *http.Request) {
 
 	if err = web.Respond(w, http.StatusOK, result); err != nil {
 		e.LogEntry.Error(err)
-		return
 	}
 }
 
@@ -121,13 +109,11 @@ func (e *ItemHandler) GetItems(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err = web.RespondError(w, http.StatusInternalServerError, err.Error()); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
 	if err = web.Respond(w, http.StatusOK, result); err != nil {
 		e.LogEntry.Error(err)
-		return
 	}
 }
 
@@ -138,7 +124,6 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusBadRequest, "Invalid item id"); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
@@ -149,7 +134,6 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusBadRequest, "Invalid payload"); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
@@ -165,17 +149,12 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			if err := web.RespondError(w, http.StatusInternalServerError, "Invalid validation input"); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
-			return
 		}
-		var message string
-		for _, err = range err.(validator.ValidationErrors) {
-			message += err.Error() + ". "
-		}
-		if err := web.RespondError(w, http.StatusBadRequest, message); err != nil {
-			e.LogEntry.Error(err)
-			return
+		if err, ok := err.(*validator.InvalidValidationError); ok {
+			if err := web.RespondError(w, http.StatusBadRequest, err.Error()); err != nil {
+				e.LogEntry.Error(err)
+			}
 		}
 		return
 	}
@@ -189,21 +168,17 @@ func (e *ItemHandler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		case sql.ErrNoRows:
 			if err := web.RespondError(w, http.StatusNotFound, "Item not found"); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
-			return
 		default:
 			if err := web.RespondError(w, http.StatusInternalServerError, err.Error()); err != nil {
 				e.LogEntry.Error(err)
-				return
 			}
-			return
 		}
+		return
 	}
 
 	if err = web.Respond(w, http.StatusOK, &i); err != nil {
 		e.LogEntry.Error(err)
-		return
 	}
 }
 
@@ -214,7 +189,6 @@ func (e *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusBadRequest, "Invalid item id"); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
@@ -223,13 +197,11 @@ func (e *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		e.LogEntry.Error(err)
 		if err := web.RespondError(w, http.StatusInternalServerError, err.Error()); err != nil {
 			e.LogEntry.Error(err)
-			return
 		}
 		return
 	}
 
 	if err = web.Respond(w, http.StatusNoContent, nil); err != nil {
 		e.LogEntry.Error(err)
-		return
 	}
 }
