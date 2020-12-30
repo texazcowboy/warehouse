@@ -2,8 +2,9 @@ package web
 
 import (
 	"encoding/json"
-	"github.com/pkg/errors"
 	"net/http"
+
+	"github.com/pkg/errors"
 )
 
 type ErrorResponse struct {
@@ -11,8 +12,9 @@ type ErrorResponse struct {
 }
 
 func Respond(w http.ResponseWriter, status int, payload interface{}) error {
-	w.WriteHeader(status)
+
 	if status == http.StatusNoContent {
+		w.WriteHeader(status)
 		return nil
 	}
 
@@ -22,6 +24,7 @@ func Respond(w http.ResponseWriter, status int, payload interface{}) error {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	_, err = w.Write(response)
 	if err != nil {
 		return errors.Wrapf(err, "Respond -> w.Write(%v)", response)
