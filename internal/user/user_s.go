@@ -23,6 +23,7 @@ func Create(user *User, db *sql.DB) error {
 		return nil
 	})
 }
+
 func Delete(id int64, db *sql.DB) error {
 	return database.ExecInTransaction(db, func(tx database.Transaction) error {
 		_, err := tx.Exec("DELETE FROM usr WHERE id=$1", id)
