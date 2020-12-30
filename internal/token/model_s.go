@@ -2,6 +2,6 @@ package token
 
 // nolint
 type Token struct {
-	AccessToken string
+	AccessToken string `json:"access_token"`
 	// todo: add RefreshToken
 }

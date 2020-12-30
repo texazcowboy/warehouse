@@ -13,6 +13,15 @@ Content-Type: application/json
     }
 %}
 
+### LOGIN
+POST http://localhost:8081/login
+Content-Type: application/json
+
+{
+  "username": "vvv",
+  "password": "very_secret"
+}
+
 ### DELETE
 DELETE http://localhost:8081/user/{{id}}
 Accept: application/json

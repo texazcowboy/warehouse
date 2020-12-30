@@ -15,8 +15,8 @@ type BaseHandler struct {
 	*validator.Validate
 }
 
-func (e *BaseHandler) renderError(w http.ResponseWriter, status int, err error) {
-	if err := web.RespondError(w, status, err.Error()); err != nil {
+func (e *BaseHandler) renderError(w http.ResponseWriter, status int, message string) {
+	if err := web.RespondError(w, status, message); err != nil {
 		e.LogEntry.Error(err)
 	}
 }

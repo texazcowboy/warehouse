@@ -24,6 +24,21 @@ func Create(user *User, db *sql.DB) error {
 	})
 }
 
+func GetByUsername(username string, db *sql.DB) (*User, error) {
+	var user User
+	err := database.ExecInTransaction(db, func(tx database.Transaction) error {
+		row := tx.QueryRow("SELECT * FROM usr WHERE username=$1", username)
+		if err := row.Scan(&user.ID, &user.Username, &user.Password); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, errors.Wrap(err, "GetByUsername -> database.ExecInTransaction(...)")
+	}
+	return &user, nil
+}
+
 func Delete(id int64, db *sql.DB) error {
 	return database.ExecInTransaction(db, func(tx database.Transaction) error {
 		_, err := tx.Exec("DELETE FROM usr WHERE id=$1", id)

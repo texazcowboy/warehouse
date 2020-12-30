@@ -9,13 +9,13 @@ import (
 
 const Secret string = "secret" // tmp solution.
 
-func GenerateToken(data map[string]string) (*Token, error) {
+func GenerateToken(data map[string]interface{}) (*Token, error) {
 	claims := jwt.MapClaims{}
 	for k, v := range data {
 		claims[k] = v
 	}
 	unsignedToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := unsignedToken.SignedString(Secret)
+	signedToken, err := unsignedToken.SignedString([]byte(Secret))
 	if err != nil {
 		return nil, errors.Wrap(err, "GenerateToken -> unsignedToken.SignedString(***)")
 	}
@@ -27,7 +27,7 @@ func VerifyToken(t string) (*jwt.Token, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); ok {
 			return nil, errors.New("wrong signing method")
 		}
-		return Secret, nil
+		return []byte(Secret), nil
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "VerifyToken ->jwt.Parse(***, func)")

@@ -108,6 +108,7 @@ func (a *App) registerHandlers() {
 	userHandler := handlers.NewUserHandler(&baseHandler)
 	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
 	a.Router.HandleFunc("/user/{id:[0-9]+}", userHandler.DeleteUser).Methods("DELETE")
+	a.Router.HandleFunc("/login", userHandler.Login).Methods("POST")
 
 	a.LogEntry.Info("Handlers successfully registered")
 }
