@@ -13,7 +13,7 @@ func NewLogger(cfg *LConfig) (*Logger, error) {
 	logger := logrus.New()
 	logger.ReportCaller = true
 	// set loggin level.
-	lvl, err := logrus.ParseLevel(string(cfg.Level))
+	lvl, err := logrus.ParseLevel(cfg.Level)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse log level")
 	}

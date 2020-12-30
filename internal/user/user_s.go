@@ -16,7 +16,8 @@ func Create(user *User, db *sql.DB) error {
 		if err != nil {
 			return errors.Wrap(err, "Create -> crypto.HashValue(***)")
 		}
-		row := tx.QueryRow("INSERT INTO usr(username, password) VALUES($1, $2) RETURNING id", user.Username, passwordHash)
+		row := tx.QueryRow("INSERT INTO usr(username, password) VALUES($1, $2) RETURNING id",
+			user.Username, passwordHash)
 		if err := row.Scan(&user.ID); err != nil {
 			return err
 		}
