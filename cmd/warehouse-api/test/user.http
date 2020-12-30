@@ -22,6 +22,13 @@ Content-Type: application/json
   "password": "very_secret"
 }
 
+> {%
+    if(response.body["access_token"]) {
+        client.global.set("accessToken", response.body.access_token);
+    }
+%}
+
 ### DELETE
 DELETE http://localhost:8081/user/{{id}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}

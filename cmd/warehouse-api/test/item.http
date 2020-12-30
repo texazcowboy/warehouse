@@ -1,9 +1,10 @@
 ### CREATE
 POST http://localhost:8081/item
 Content-Type: application/json
+Authorization: Bearer {{accessToken}}
 
 {
-  "name": "12345678"
+  "name": "12345"
 }
 
 > {%
@@ -15,14 +16,17 @@ Content-Type: application/json
 ### GET
 GET http://localhost:8081/item/{{id}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### GET ALL
 GET http://localhost:8081/items
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 ### UPDATE
 PUT http://localhost:8081/item/{{id}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}
 
 {
   "name": "updated"
@@ -31,3 +35,4 @@ Accept: application/json
 ### DELETE
 DELETE http://localhost:8081/item/{{id}}
 Accept: application/json
+Authorization: Bearer {{accessToken}}
