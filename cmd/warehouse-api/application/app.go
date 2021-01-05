@@ -98,7 +98,7 @@ func (a *App) readConfiguration() {
 	if err := a.Validate.Struct(cfg); err != nil {
 		panic(err)
 	}
-	a.ApplicationConfig = &cfg
+	a.Config = &cfg
 }
 
 func (a *App) registerHandlers() {
