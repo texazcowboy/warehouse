@@ -1,6 +1,7 @@
-package handlers
+package user
 
 import (
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 	"net/http"
 	"time"
 
@@ -14,20 +15,20 @@ import (
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
 )
 
-type UserHandler struct {
-	*BaseHandler
+type Handler struct {
+	*common.BaseHandler
 }
 
-func NewUserHandler(base *BaseHandler) *UserHandler {
-	return &UserHandler{base}
+func NewUserHandler(base *common.BaseHandler) *Handler {
+	return &Handler{base}
 }
 
-func (e *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (e *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var u user.User
 	err := web.Decode(r, &u)
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusBadRequest, err.Error())
+		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer func() {
@@ -40,10 +41,10 @@ func (e *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err = e.Validate.Struct(&u); err != nil {
 		e.LogEntry.Error(err)
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			e.renderError(w, http.StatusInternalServerError, err.Error())
+			e.RenderError(w, http.StatusInternalServerError, err.Error())
 		}
 		if err, ok := err.(validator.ValidationErrors); ok {
-			e.renderError(w, http.StatusBadRequest, err.Error())
+			e.RenderError(w, http.StatusBadRequest, err.Error())
 		}
 		return
 	}
@@ -51,19 +52,19 @@ func (e *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	err = user.Create(&u, e.DB)
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusInternalServerError, err.Error())
+		e.RenderError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	u.Password = "***"
-	e.renderSuccess(w, http.StatusCreated, &u)
+	e.RenderSuccess(w, http.StatusCreated, &u)
 }
 
-func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (e *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var u user.User
 	err := web.Decode(r, &u)
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusBadRequest, err.Error())
+		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer func() {
@@ -76,10 +77,10 @@ func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err = e.Validate.Struct(&u); err != nil {
 		e.LogEntry.Error(err)
 		if _, ok := err.(*validator.InvalidValidationError); ok {
-			e.renderError(w, http.StatusInternalServerError, err.Error())
+			e.RenderError(w, http.StatusInternalServerError, err.Error())
 		}
 		if err, ok := err.(validator.ValidationErrors); ok {
-			e.renderError(w, http.StatusBadRequest, err.Error())
+			e.RenderError(w, http.StatusBadRequest, err.Error())
 		}
 		return
 	}
@@ -87,11 +88,11 @@ func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	savedUser, err := user.GetByUsername(u.Username, e.DB)
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusUnauthorized, "unauthorized")
+		e.RenderError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	if !crypto.Equals(u.Password, savedUser.Password) {
-		e.renderError(w, http.StatusUnauthorized, "unauthorized")
+		e.RenderError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
 	generatedToken, err := security.GenerateToken(map[string]interface{}{
@@ -102,25 +103,25 @@ func (e *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusInternalServerError, "something went wrong")
+		e.RenderError(w, http.StatusInternalServerError, "something went wrong")
 		return
 	}
-	e.renderSuccess(w, http.StatusOK, generatedToken)
+	e.RenderSuccess(w, http.StatusOK, generatedToken)
 }
 
-func (e *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (e *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := web.ExtractIntFromRequest(r, "id")
 	if err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusBadRequest, err.Error())
+		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = user.Delete(int64(id), e.DB); err != nil {
 		e.LogEntry.Error(err)
-		e.renderError(w, http.StatusInternalServerError, err.Error())
+		e.RenderError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	e.renderSuccess(w, http.StatusNoContent, nil)
+	e.RenderSuccess(w, http.StatusNoContent, nil)
 }

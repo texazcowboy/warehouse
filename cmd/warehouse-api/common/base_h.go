@@ -1,4 +1,4 @@
-package handlers
+package common
 
 import (
 	"database/sql"
@@ -15,13 +15,13 @@ type BaseHandler struct {
 	*validator.Validate
 }
 
-func (e *BaseHandler) renderError(w http.ResponseWriter, status int, message string) {
+func (e *BaseHandler) RenderError(w http.ResponseWriter, status int, message string) {
 	if err := web.RespondError(w, status, message); err != nil {
 		e.LogEntry.Error(err)
 	}
 }
 
-func (e *BaseHandler) renderSuccess(w http.ResponseWriter, status int, payload interface{}) {
+func (e *BaseHandler) RenderSuccess(w http.ResponseWriter, status int, payload interface{}) {
 	if err := web.Respond(w, status, payload); err != nil {
 		e.LogEntry.Error(err)
 	}

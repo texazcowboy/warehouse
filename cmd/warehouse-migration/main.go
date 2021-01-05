@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/texazcowboy/warehouse/cmd/warehouse-migration/entrypoint"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-migration/application"
 )
 
 // note: applies all scripts
 func main() {
-	var app entrypoint.App
+	var app application.App
 	app.Initialize()
 	app.Run()
 }

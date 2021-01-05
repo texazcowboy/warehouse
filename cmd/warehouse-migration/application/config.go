@@ -1,4 +1,4 @@
-package entrypoint
+package application
 
 import (
 	"github.com/texazcowboy/warehouse/internal/foundation/database"

@@ -1,4 +1,4 @@
-package entrypoint
+package application
 
 import (
 	"errors"

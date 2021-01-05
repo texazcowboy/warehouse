@@ -19,6 +19,12 @@ func AuthenticationMiddleware(next http.HandlerFunc, l *logrus.Entry, validatorF
 			}
 			return
 		}
+		if arr[0] != "Bearer" {
+			if err := RespondError(w, http.StatusBadRequest, "unsupported authorization type"); err != nil {
+				l.Error(err)
+			}
+			return
+		}
 		err := validatorFunc(arr[1])
 		if err != nil {
 			if err := RespondError(w, http.StatusUnauthorized, "unauthorized"); err != nil {

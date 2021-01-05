@@ -1,8 +1,11 @@
-package entrypoint
+package application
 
 import (
 	"database/sql"
 	"flag"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/item"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/user"
 	"net/http"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/security"
@@ -14,7 +17,6 @@ import (
 	"github.com/texazcowboy/warehouse/internal/foundation/logger"
 
 	"github.com/gorilla/mux"
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
 	"github.com/texazcowboy/warehouse/internal/foundation/database"
 )
 
@@ -100,9 +102,9 @@ func (a *App) readConfiguration() {
 
 func (a *App) registerHandlers() {
 	a.LogEntry.Info("Registering handlers")
-	baseHandler := handlers.BaseHandler{DB: a.DB, Logger: a.Logger, Validate: a.Validate}
+	baseHandler := common.BaseHandler{DB: a.DB, Logger: a.Logger, Validate: a.Validate}
 
-	itemHandler := handlers.NewItemHandler(&baseHandler)
+	itemHandler := item.NewItemHandler(&baseHandler)
 	a.Router.HandleFunc("/item",
 		web.AuthenticationMiddleware(itemHandler.CreateItem, a.LogEntry, security.ValidateToken)).Methods("POST")
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
@@ -114,7 +116,7 @@ func (a *App) registerHandlers() {
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
 		web.AuthenticationMiddleware(itemHandler.DeleteItem, a.LogEntry, security.ValidateToken)).Methods("DELETE")
 
-	userHandler := handlers.NewUserHandler(&baseHandler)
+	userHandler := user.NewUserHandler(&baseHandler)
 	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
 	a.Router.HandleFunc("/user/{id:[0-9]+}",
 		web.AuthenticationMiddleware(userHandler.DeleteUser, a.LogEntry, security.ValidateToken)).Methods("DELETE")

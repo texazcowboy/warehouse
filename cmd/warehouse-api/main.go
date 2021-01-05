@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/entrypoint"
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/application"
 )
 
 func main() {
-	var app entrypoint.App
+	var app application.App
 	app.Initialize()
 	app.Run()
 }
