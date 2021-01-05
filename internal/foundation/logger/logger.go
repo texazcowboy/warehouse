@@ -12,7 +12,7 @@ type Logger struct {
 func NewLogger(cfg *LConfig) (*Logger, error) {
 	logger := logrus.New()
 	logger.ReportCaller = true
-	// set loggin level.
+	// set logging level.
 	lvl, err := logrus.ParseLevel(cfg.Level)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to parse log level")

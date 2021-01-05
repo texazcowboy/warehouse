@@ -1,9 +1,10 @@
 package user
 
 import (
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 	"net/http"
 	"time"
+
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/security"
 

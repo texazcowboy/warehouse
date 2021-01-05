@@ -3,10 +3,11 @@ package application
 import (
 	"database/sql"
 	"flag"
+	"net/http"
+
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/item"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/user"
-	"net/http"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/security"
 
@@ -25,7 +26,7 @@ var (
 )
 
 type App struct {
-	*ApplicationConfig
+	*Config
 	*logger.Logger
 	*mux.Router
 	*sql.DB
@@ -90,7 +91,7 @@ func (a *App) setupRouter() {
 }
 
 func (a *App) readConfiguration() {
-	var cfg ApplicationConfig
+	var cfg Config
 	if err := cfg.Read(configPath); err != nil {
 		panic(err)
 	}

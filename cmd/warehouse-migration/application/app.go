@@ -25,7 +25,7 @@ func init() {
 }
 
 type App struct {
-	*ApplicationConfig
+	*Config
 	*logger.Logger
 	*validator.Validate
 	initialized bool
@@ -53,7 +53,7 @@ func (a *App) Run() {
 }
 
 func (a *App) readConfiguration() {
-	var cfg ApplicationConfig
+	var cfg Config
 	if err := cfg.Read(configPath); err != nil {
 		panic(err)
 	}

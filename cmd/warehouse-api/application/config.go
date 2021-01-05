@@ -7,12 +7,12 @@ import (
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
 )
 
-type ApplicationConfig struct {
+type Config struct {
 	ServerCfg   *web.WConfig       `yaml:"server" validate:"required"`
 	DatabaseCfg *database.DBConfig `yaml:"database" validate:"required"`
 	LoggerCfg   *logger.LConfig    `yaml:"log" validate:"required"`
 }
 
-func (c *ApplicationConfig) Read(path *string) error {
+func (c *Config) Read(path *string) error {
 	return parser.ParseFile(c, *path)
 }

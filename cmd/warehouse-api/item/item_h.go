@@ -2,8 +2,9 @@ package item
 
 import (
 	"database/sql"
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 	"net/http"
+
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 
 	"github.com/go-playground/validator/v10"
 
