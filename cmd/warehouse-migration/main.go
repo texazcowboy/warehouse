@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/texazcowboy/warehouse/cmd/warehouse-migration/application"
+	// register drivers.
+	_ "github.com/lib/pq"
 )
 
 // note: applies all scripts

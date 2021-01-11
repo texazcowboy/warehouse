@@ -8,7 +8,7 @@ import (
 func HashValue(p string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
 	if err != nil {
-		return "", errors.Wrapf(err, "HashValue -> bcrypt.GenerateFromPassword(***, %v)", bcrypt.DefaultCost)
+		return "", errors.Wrapf(err, "crypto: HashValue -> bcrypt.GenerateFromPassword(***, %v)", bcrypt.DefaultCost)
 	}
 	return string(hash), nil
 }

@@ -13,7 +13,7 @@ func ExtractIntFromRequest(r *http.Request, varName string) (int, error) {
 	pathVar := vars[varName]
 	id, err := strconv.Atoi(pathVar)
 	if err != nil {
-		return 0, errors.Wrapf(err, "extractIntValue -> strconv.Atoi(%v)", pathVar)
+		return 0, errors.Wrapf(err, "web: ExtractIntFromRequest -> strconv.Atoi(%v)", pathVar)
 	}
 	return id, nil
 }

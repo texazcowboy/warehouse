@@ -44,11 +44,11 @@ func (a *App) Initialize() {
 func (a *App) Run() {
 	m, err := setupMigration(a.DBConfig)
 	if err != nil {
-		a.LogEntry.Fatal(err)
+		a.LogEntry.WithError(err).Fatal("Unable to setup migration")
 	}
 	err = applyMigration(m)
 	if err != nil {
-		a.LogEntry.Fatal(err)
+		a.LogEntry.WithError(err).Fatal("Unable to apply migration")
 	}
 }
 

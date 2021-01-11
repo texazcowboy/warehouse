@@ -5,8 +5,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type stackTracer interface {
+	StackTrace() errors.StackTrace
+}
+
 type Logger struct {
-	LogEntry *logrus.Entry
+	LogEntry *LogEntryWithStackTrace
+}
+
+type LogEntryWithStackTrace struct {
+	*logrus.Entry
+}
+
+func (l *LogEntryWithStackTrace) WithError(err error) *logrus.Entry {
+	entry := l.Entry
+	if stackErr, ok := err.(stackTracer); ok {
+		entry = entry.WithField("stacktrace", stackErr.StackTrace())
+	}
+	return entry.WithError(err)
 }
 
 func NewLogger(cfg *LConfig) (*Logger, error) {
@@ -15,7 +31,7 @@ func NewLogger(cfg *LConfig) (*Logger, error) {
 	// set logging level.
 	lvl, err := logrus.ParseLevel(cfg.Level)
 	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse log level")
+		return nil, errors.Wrapf(err, "logger: NewLogger -> logrus.ParseLevel(%v)", cfg.Level)
 	}
 	logger.SetLevel(lvl)
 	// set log format.
@@ -25,9 +41,9 @@ func NewLogger(cfg *LConfig) (*Logger, error) {
 	case TEXT:
 		logger.SetFormatter(&logrus.TextFormatter{})
 	default:
-		return nil, errors.New("Unknown log format: " + string(cfg.Format))
+		return nil, errors.New("logger: Unknown log format: " + string(cfg.Format))
 	}
 	// set common fields.
 	entry := logger.WithField("app_name", cfg.AppName)
-	return &Logger{entry}, nil
+	return &Logger{&LogEntryWithStackTrace{entry}}, nil
 }

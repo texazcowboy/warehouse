@@ -8,7 +8,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Message string
+	Message string `json:"message"`
 }
 
 func Respond(w http.ResponseWriter, status int, payload interface{}) error {
@@ -19,14 +19,14 @@ func Respond(w http.ResponseWriter, status int, payload interface{}) error {
 
 	response, err := json.Marshal(payload)
 	if err != nil {
-		return errors.Wrapf(err, "Respond -> json.Marshal(%v)", payload)
+		return errors.Wrapf(err, "web: Respond -> json.Marshal(%v)", payload)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_, err = w.Write(response)
 	if err != nil {
-		return errors.Wrapf(err, "Respond -> w.Write(%v)", response)
+		return errors.Wrapf(err, "web: Respond -> w.Write(%v)", response)
 	}
 
 	return nil

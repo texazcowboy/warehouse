@@ -28,19 +28,19 @@ func (e *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var u user.User
 	err := web.Decode(r, &u)
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to decode request body")
 		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer func() {
 		err := r.Body.Close()
 		if err != nil {
-			e.LogEntry.Error(err)
+			e.LogEntry.WithError(err).Error("Unable to close request body")
 		}
 	}()
 
 	if err = e.Validate.Struct(&u); err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Invalid request body ")
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			e.RenderError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -52,7 +52,7 @@ func (e *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	err = user.Create(&u, e.DB)
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to create user")
 		e.RenderError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -64,19 +64,19 @@ func (e *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	var u user.User
 	err := web.Decode(r, &u)
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to decode request body")
 		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	defer func() {
 		err := r.Body.Close()
 		if err != nil {
-			e.LogEntry.Error(err)
+			e.LogEntry.WithError(err).Error("Unable to close request body")
 		}
 	}()
 
 	if err = e.Validate.Struct(&u); err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Invalid request body ")
 		if _, ok := err.(*validator.InvalidValidationError); ok {
 			e.RenderError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -88,7 +88,7 @@ func (e *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	savedUser, err := user.GetByUsername(u.Username, e.DB)
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to get user by username")
 		e.RenderError(w, http.StatusUnauthorized, "unauthorized")
 		return
 	}
@@ -103,7 +103,7 @@ func (e *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		"exp":        time.Now().Add(time.Minute * 15).Unix(), // nolint
 	})
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to generate token")
 		e.RenderError(w, http.StatusInternalServerError, "something went wrong")
 		return
 	}
@@ -113,13 +113,13 @@ func (e *Handler) Login(w http.ResponseWriter, r *http.Request) {
 func (e *Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	id, err := web.ExtractIntFromRequest(r, "id")
 	if err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to extract id from request")
 		e.RenderError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = user.Delete(int64(id), e.DB); err != nil {
-		e.LogEntry.Error(err)
+		e.LogEntry.WithError(err).Error("Unable to delete user")
 		e.RenderError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

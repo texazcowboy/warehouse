@@ -31,5 +31,5 @@ func ExecInTransaction(db *sql.DB, fn TxFn) (err error) {
 	}()
 
 	err = fn(tx)
-	return err
+	return
 }

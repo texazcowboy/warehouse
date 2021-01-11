@@ -3,9 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-
-	// register drivers.
-	_ "github.com/lib/pq"
 )
 
 func OpenConnection(cfg *DBConfig) (*sql.DB, error) {
