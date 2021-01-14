@@ -2,9 +2,10 @@ package application
 
 import (
 	"database/sql"
-	"flag"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/item"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/user"
@@ -21,9 +22,7 @@ import (
 	"github.com/texazcowboy/warehouse/internal/foundation/database"
 )
 
-var (
-	configPath = flag.String("config", "../../config.yaml", "config file location")
-)
+var configPath string
 
 type App struct {
 	*Config
@@ -35,7 +34,15 @@ type App struct {
 }
 
 func init() {
-	flag.Parse()
+	args := os.Args[1:]
+	if len(args) == 0 {
+		panic("app: .env file path argument not provided")
+	}
+	envFileLoc := args[0]
+	if err := godotenv.Load(envFileLoc); err != nil {
+		panic(err)
+	}
+	configPath = os.Getenv("CONFIG_LOCATION")
 }
 
 func (a *App) Initialize() {

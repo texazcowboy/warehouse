@@ -13,6 +13,6 @@ type Config struct {
 	LoggerCfg   *logger.LConfig    `yaml:"log" validate:"required"`
 }
 
-func (c *Config) Read(path *string) error {
-	return parser.ParseFile(c, *path)
+func (c *Config) Read(path string) error {
+	return parser.ParseFile(c, path)
 }
