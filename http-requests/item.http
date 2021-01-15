@@ -29,7 +29,7 @@ Accept: application/json
 Authorization: Bearer {{accessToken}}
 
 {
-  "name": "updated"
+  "name": "upd"
 }
 
 ### DELETE

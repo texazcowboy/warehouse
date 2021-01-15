@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
+	"github.com/texazcowboy/warehouse/internal/item"
+
 	"github.com/joho/godotenv"
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/common"
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/item"
-	"github.com/texazcowboy/warehouse/cmd/warehouse-api/user"
-
 	"github.com/texazcowboy/warehouse/internal/foundation/security"
 
 	"github.com/texazcowboy/warehouse/internal/foundation/web"
@@ -112,7 +112,10 @@ func (a *App) registerHandlers() {
 	a.LogEntry.Info("Registering handlers")
 	baseHandler := common.BaseHandler{DB: a.DB, Logger: a.Logger, Validate: a.Validate}
 
-	itemHandler := item.NewItemHandler(&baseHandler)
+	itemRepository := item.NewRepository(a.DB)
+	itemService := item.NewService(itemRepository)
+	itemHandler := handlers.NewItemHandler(&baseHandler, itemService)
+
 	a.Router.HandleFunc("/item",
 		web.AuthenticationMiddleware(itemHandler.CreateItem, a.LogEntry, security.ValidateToken)).Methods("POST")
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
@@ -124,7 +127,7 @@ func (a *App) registerHandlers() {
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
 		web.AuthenticationMiddleware(itemHandler.DeleteItem, a.LogEntry, security.ValidateToken)).Methods("DELETE")
 
-	userHandler := user.NewUserHandler(&baseHandler)
+	userHandler := handlers.NewUserHandler(&baseHandler)
 	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
 	a.Router.HandleFunc("/user/{id:[0-9]+}",
 		web.AuthenticationMiddleware(userHandler.DeleteUser, a.LogEntry, security.ValidateToken)).Methods("DELETE")
