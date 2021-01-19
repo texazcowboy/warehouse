@@ -5,7 +5,7 @@ type ServiceInterface interface {
 	GetItem(id int64) (*Item, error)
 	GetAllItems() ([]*Item, error)
 	UpdateItem(item *Item) (int64, error)
-	DeleteItem(id int64) (int64, error)
+	DeleteItem(id int64) error
 }
 
 type Service struct {
@@ -28,7 +28,7 @@ func (s *Service) UpdateItem(item *Item) (int64, error) {
 	return s.repository.Update(item)
 }
 
-func (s *Service) DeleteItem(id int64) (int64, error) {
+func (s *Service) DeleteItem(id int64) error {
 	return s.repository.DeleteByID(id)
 }
 

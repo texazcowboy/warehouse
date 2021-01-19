@@ -20,7 +20,7 @@ type RepositoryInterface interface {
 	GetByID(id int64) (*Item, error)
 	GetAll() ([]*Item, error)
 	Update(item *Item) (int64, error)
-	DeleteByID(id int64) (int64, error)
+	DeleteByID(id int64) error
 }
 
 func NewRepository(db *sql.DB) RepositoryInterface {
@@ -138,11 +138,8 @@ func (r *Repository) Update(item *Item) (int64, error) {
 	return rowsUpdated, err
 }
 
-func (r *Repository) DeleteByID(id int64) (int64, error) {
-
-	var rowsDeleted int64
-
-	err := database.ExecInTransaction(r.db, func(tx database.Transaction) error {
+func (r *Repository) DeleteByID(id int64) error {
+	return database.ExecInTransaction(r.db, func(tx database.Transaction) error {
 
 		stmt, err := tx.Prepare(deleteByIDQuery)
 		if err != nil {
@@ -150,18 +147,11 @@ func (r *Repository) DeleteByID(id int64) (int64, error) {
 		}
 		defer stmt.Close()
 
-		res, err := stmt.Exec(id)
-		if err != nil {
-			return database.NewSQLError(err)
-		}
-
-		rowsDeleted, err = res.RowsAffected()
+		_, err = stmt.Exec(id)
 		if err != nil {
 			return database.NewSQLError(err)
 		}
 
 		return nil
 	})
-
-	return rowsDeleted, err
 }

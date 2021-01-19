@@ -144,7 +144,7 @@ func (h *ItemHandler) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = h.service.DeleteItem(int64(id)); err != nil { // todo: use affected rows
+	if err = h.service.DeleteItem(int64(id)); err != nil {
 		h.LogEntry.WithError(err).Error("Unable to delete item by id")
 		h.RenderError(w, http.StatusInternalServerError, err.Error())
 		return

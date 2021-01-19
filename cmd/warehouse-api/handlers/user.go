@@ -18,10 +18,11 @@ import (
 
 type UserHandler struct {
 	*common.BaseHandler
+	service user.ServiceInterface
 }
 
-func NewUserHandler(base *common.BaseHandler) *UserHandler {
-	return &UserHandler{base}
+func NewUserHandler(base *common.BaseHandler, service user.ServiceInterface) *UserHandler {
+	return &UserHandler{base, service}
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +51,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = user.Create(&u, h.DB)
+	err = h.service.CreateUser(&u)
 	if err != nil {
 		h.LogEntry.WithError(err).Error("Unable to create user")
 		h.RenderError(w, http.StatusInternalServerError, err.Error())
@@ -86,7 +87,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	savedUser, err := user.GetByUsername(u.Username, h.DB)
+	savedUser, err := h.service.GetUserByUsername(u.Username)
 	if err != nil {
 		h.LogEntry.WithError(err).Error("Unable to get user by username")
 		h.RenderError(w, http.StatusUnauthorized, "unauthorized")
@@ -118,7 +119,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err = user.Delete(int64(id), h.DB); err != nil {
+	if err = h.service.DeleteUserByID(int64(id)); err != nil {
 		h.LogEntry.WithError(err).Error("Unable to delete user")
 		h.RenderError(w, http.StatusInternalServerError, err.Error())
 		return

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/texazcowboy/warehouse/internal/user"
+
 	"github.com/texazcowboy/warehouse/cmd/warehouse-api/handlers"
 	"github.com/texazcowboy/warehouse/internal/item"
 
@@ -127,7 +129,10 @@ func (a *App) registerHandlers() {
 	a.Router.HandleFunc("/item/{id:[0-9]+}",
 		web.AuthenticationMiddleware(itemHandler.DeleteItem, a.LogEntry, security.ValidateToken)).Methods("DELETE")
 
-	userHandler := handlers.NewUserHandler(&baseHandler)
+	userRepository := user.NewRepository(a.DB)
+	userService := user.NewService(userRepository)
+	userHandler := handlers.NewUserHandler(&baseHandler, userService)
+
 	a.Router.HandleFunc("/user", userHandler.CreateUser).Methods("POST")
 	a.Router.HandleFunc("/user/{id:[0-9]+}",
 		web.AuthenticationMiddleware(userHandler.DeleteUser, a.LogEntry, security.ValidateToken)).Methods("DELETE")
