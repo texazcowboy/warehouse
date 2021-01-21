@@ -39,7 +39,7 @@ linters:
     - unparam
     - unused
     - varcheck
-    - whitespace
+#    - whitespace
     - asciicheck
 #    - gochecknoglobals
     - gocognit
