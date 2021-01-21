@@ -6,7 +6,7 @@ CONFIG_LOCATION := ./config.yaml
 
 .PHONY: run-api
 run-api: build-api
-	./bin/warehouse-api .env
+	CONFIG=$(CONFIG_LOCATION) ./bin/warehouse-api
 
 .PHONY: build-api
 # just an alias for api binary path
@@ -21,7 +21,7 @@ test-api:
 
 .PHONY: run-migration
 run-migration: build-migration
-	./bin/warehouse-migration -config=$(CONFIG_LOCATION) -src=file://cmd/warehouse-migration/migrations
+	CONFIG=$(CONFIG_LOCATION) SOURCE=file://cmd/warehouse-migration/migrations DIRECTION=up ./bin/warehouse-migration
 
 .PHONY: build-migration
 # just an alias for migration binary path

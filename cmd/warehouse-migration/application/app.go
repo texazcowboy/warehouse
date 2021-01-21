@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/go-playground/validator/v10"
 
@@ -15,9 +16,9 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "../../config.yaml", "config file location")
-	sourcePath = flag.String("src", "file://migrations", "migration source")
-	direction  = flag.String("drc", "up", "migration direction")
+	configPath = os.Getenv("CONFIG")
+	sourcePath = os.Getenv("SOURCE")
+	direction  = os.Getenv("DIRECTION")
 )
 
 func init() {
@@ -76,17 +77,17 @@ func (a *App) setupLogger() {
 }
 
 func setupMigration(cfg *database.DBConfig) (*migrate.Migrate, error) {
-	return migrate.New(*sourcePath, buildConnectionString(cfg))
+	return migrate.New(sourcePath, buildConnectionString(cfg))
 }
 
 func applyMigration(m *migrate.Migrate) error {
-	switch *direction {
+	switch direction {
 	case "up":
 		return m.Up()
 	case "down":
 		return m.Down()
 	default:
-		return errors.New("Invalid direction provided: " + *direction + " Available directions: [up, down]")
+		return errors.New("Invalid direction provided: " + direction + " Available directions: [up, down]")
 	}
 }
 
